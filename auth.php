@@ -32,7 +32,8 @@ if(empty($accessToken)) {
   curl_close($ch);
 
   if(strpos($response, 'error') !== false) {
-    die("There was an error authenticating with Reddit. Please check your username, client ID, and client secret: " . $response);
+	echo $response;
+    die("There was an error authenticating with Reddit. Please check your username, client ID, and client secret");
   }
 
   $accessToken = json_decode($response)->access_token;
