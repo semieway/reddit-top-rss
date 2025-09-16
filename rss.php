@@ -1,15 +1,13 @@
 <?php
 // With some help from https://www.sanwebe.com/2013/07/creating-valid-rss-feed-using-php
 
-header("Content-Type: text/xml; charset=utf-8", true);
+header("Content-Type: application/rss+xml; charset=UTF-8", true);
 
 
 // Return cached RSS feed, if it exists and if it was cached in the past hour
-if(CACHE_RSS_FEEDS) {
-	if(file_exists("cache/rss/" . $_SERVER["REQUEST_URI"] . ".xml") && time() - filemtime("cache/rss/" . $_SERVER["REQUEST_URI"] . ".xml") < 60 * 60) {
-		echo file_get_contents("cache/rss/" . $_SERVER["REQUEST_URI"] . ".xml", true);
-		exit;
-	}
+if(file_exists("cache/rss/" . $_SERVER["REQUEST_URI"] . ".xml") && time() - filemtime("cache/rss/" . $_SERVER["REQUEST_URI"] . ".xml") < 60 * 60) {
+	echo file_get_contents("cache/rss/" . $_SERVER["REQUEST_URI"] . ".xml", true);
+	exit;
 }
 
 
@@ -18,14 +16,14 @@ include "sort-and-filter.php";
 
 
 // Get Subreddit feed
-$jsonFeedFile = getFile("https://oauth.reddit.com/r/" . $subreddit . ".json", "redditJSON", "cache/reddit/$subreddit.json", 60 * 5, $accessToken);
+$jsonFeedFile = getFile("https://oauth.reddit.com/r/" . $subreddit . "/top/.json?t=month&limit=100", "redditJSON", "cache/reddit/$subreddit.json", 60 * 5, $accessToken);
 $jsonFeedFileParsed = json_decode($jsonFeedFile, true);
 $jsonFeedFileItems = $jsonFeedFileParsed["data"]["children"];
 usort($jsonFeedFileItems, "sortByCreatedDate");
 
 
 // Feed description text
-$feedDescriptionText = "Hot posts in /r/";
+$feedDescriptionText = "Posts in /r/";
 $feedDescriptionText .= $subreddit;
 if($thresholdScore) {
 	if(isset($_GET["score"]) && $_GET["score"]) {
@@ -232,17 +230,6 @@ foreach($jsonFeedFileItems as $item) {
 				$imageUrl = str_replace(["http://www.livememe.com/", "https://www.livememe.com/"], "https://i.lvme.me/", $itemDataUrl);
 				$itemDescription .= "<p><img src='" . $imageUrl . ".jpg' /></p>";
 			break;
-
-			// Mercury-parsed lead image
-			case MERCURY_URL && strpos($item["data"]["domain"], "self.") == false:
-				$mercuryJSON = getFile($itemDataUrl, "mercuryJSON", "cache/mercury/" . filter_var($itemDataUrl, FILTER_SANITIZE_ENCODED) . ".json", 60 * 60 * 24 * 7, $accessToken);
-				if(!isset(json_decode($mercuryJSON)->message) || json_decode($mercuryJSON)->message != "Internal server error") {
-					$mercuryJSON = json_decode($mercuryJSON);
-					if ($mercuryJSON->lead_image_url) {
-						$itemDescription .= "<p><img src='" . $mercuryJSON->lead_image_url . "' /></p>";
-					}
-				}
-			break;
 		}
 
 
@@ -261,16 +248,6 @@ foreach($jsonFeedFileItems as $item) {
 
 			// No selftext and domain contains self
 			case !isset($item["data"]["selftext_html"]) && strpos($item["data"]["domain"],"self.") !== false:
-			break;
-
-			// Mercury-parsed article content
-			case MERCURY_URL && strpos($item["data"]["domain"], "self.") == false && strpos($item["data"]["url"], "redd.it") == false:
-				$mercuryJSON = getFile($itemDataUrl, "mercuryJSON", "cache/mercury/" . filter_var($itemDataUrl, FILTER_SANITIZE_ENCODED) . ".json", 60 * 60 * 24 * 7, $accessToken);
-				if(!isset(json_decode($mercuryJSON)->message) || json_decode($mercuryJSON)->message != "Internal server error") {
-					if ($mercuryJSON = json_decode($mercuryJSON)) {
-						$itemDescription .= $mercuryJSON->content;
-					}
-				}
 			break;
 		}
 
@@ -325,9 +302,7 @@ foreach($jsonFeedFileItems as $item) {
 
 
 // Cache RSS feed
-if(CACHE_RSS_FEEDS) {
-	file_put_contents("cache/rss/" . $_SERVER["REQUEST_URI"] . ".xml", $xml->saveXML());
-}
+file_put_contents("cache/rss/" . $_SERVER["REQUEST_URI"] . ".xml", $xml->saveXML());
 
 
 // Echo the feed

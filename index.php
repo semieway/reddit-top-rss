@@ -1,15 +1,9 @@
 <?php
 
-// Config
-if (!file_exists('config.php')) {
-	copy('config-default.php', 'config.php');
-}
-require_once 'config.php';
-
+const DEFAULT_SUBREDDIT = 'pics';
 
 // Auth
 include 'auth.php';
-
 
 // Globals
 global $subreddit;
@@ -18,10 +12,8 @@ global $thresholdPercentage;
 global $thresholdPostsPerDay;
 global $mercuryJSON;
 
-
 // Cache
 include 'cache.php';
-
 
 // View format
 if(isset($_GET['view']) && $_GET['view'] == 'rss') {

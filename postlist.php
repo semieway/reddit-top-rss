@@ -1,19 +1,10 @@
 <?php
 
-// Config
-if (!file_exists('config.php')) {
-	copy('config-default.php', 'config.php');
-}
-require_once 'config.php';
-
-
 // Auth
 include 'auth.php';
 
-
 // Sort and filter
 include "sort-and-filter.php";
-
 
 // Description text
 $postListDescription = "<p>Hot posts in <strong>/r/";
@@ -37,8 +28,8 @@ if($thresholdScore) {
 $postListDescription .= "</p>";
 
 
-// Get subreddit hot posts
-$jsonFeedFile = getFile("https://oauth.reddit.com/r/" . $subreddit . ".json", "redditJSON", "cache/reddit/$subreddit.json", 60 * 5, $accessToken);
+// Get subreddit posts
+$jsonFeedFile = getFile("https://oauth.reddit.com/r/" . $subreddit . "/top/.json?t=month&limit=100", "redditJSON", "cache/reddit/$subreddit.json", 60 * 5, $accessToken);
 $jsonFeedFileParsed = json_decode($jsonFeedFile, true);
 if(empty($jsonFeedFileParsed)) {
   echo "<div class='alert alert-warning' role='alert'>/r/" . $subreddit . " is not a valid subreddit</div>";
@@ -80,6 +71,4 @@ if($postListText) {
 
 
 // Echo cache size
-if(CACHE_REDDIT_JSON == true || CACHE_MERCURY_CONTENT == true || CACHE_RSS_FEEDS == true) {
-  echo "<div class='cache-size d-none' data-cache-size='" . sizeFormat(directorySize("cache")) . "'></div>";
-}
+echo "<div class='cache-size d-none' data-cache-size='" . sizeFormat(directorySize("cache")) . "'></div>";

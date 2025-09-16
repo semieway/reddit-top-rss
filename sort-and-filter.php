@@ -75,9 +75,9 @@ if(isset($_GET["score"]) && $_GET["score"]) {
 
 // Sort by Created Date
 function sortByCreatedDate($a, $b) {
-	if ($a["data"]["created_utc"] > $b["data"]["created_utc"]) {
+	if ($a["data"]["created_utc"] < $b["data"]["created_utc"]) {
 		return 1;
-	} else if ($a["data"]["created_utc"] < $b["data"]["created_utc"]) {
+	} else if ($a["data"]["created_utc"] > $b["data"]["created_utc"]) {
 		return -1;
 	} else {
 		return 0;
