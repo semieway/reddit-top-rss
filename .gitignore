@@ -2,6 +2,7 @@
 #  Main ignored files
 #------------------------
 /.vscode
+/.idea
 /cache
 /config.php
 /env.php
