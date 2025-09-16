@@ -1,0 +1,5 @@
+name: reddit-top-rss
+app_id: da_KAmI3tXU0JkL
+owner: semieway
+package: '.'
+kind: wasmer.io/App.v0

@@ -1,0 +1,23 @@
+[package]
+name = "reddit-top-rss"
+version = "0.1.0"
+description = "Reddit RSS"
+license = "MIT"
+
+[dependencies]
+"php/php" = "*"
+
+[fs]
+"/app" = "."
+
+[[command]]
+name = "run"
+module = "php/php:php"
+runner = "wasi"
+
+[command.annotations.wasi]
+main-args = ["-t", "/app", "-S", "0.0.0.0:8080"]
+env = [
+  "DOCUMENT_ROOT=/app",
+  "SCRIPT_FILENAME=/app/index.php"
+]
